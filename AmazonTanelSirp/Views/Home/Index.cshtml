@@ -1,0 +1,107 @@
+﻿@{
+	ViewBag.Title = "Home Page";
+}
+
+<h3 style="margin-left:10px;">Search on Amazon.com</h3>
+
+<form name="searchForm" class="form-inline" action="/Home/Search" method="get">
+  <div class="row">
+    <div class="col-lg-7 col-lg-offset-2">
+      <div class="input-group">
+        <input type="text" value="@( true ? ViewBag.keywords : "Harry Potter")" name="keywords" class="form-control">
+		<input type="hidden" value="1" name="page" />
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="submit">Search</button>
+        </span>
+      </div><!-- /input-group -->
+    </div><!-- /.col-lg-6 -->
+  </div>
+</form>
+
+
+
+@if (ViewBag.results == null)
+{
+
+}
+else
+{
+	if (ViewBag.results.Count == 0)
+	{
+		<div style="font-size:120%; font-weight:bold; color:red; margin:20px;">Your search did not match any products</div>
+	}
+	else
+	{
+		int j = 0;
+		<div class="row" style="margin-top:10px;">
+		<ul class="list-group col-lg-offset-1">
+		@foreach(var item in ViewBag.results)
+		{
+	
+			<li class="list-group-item col-lg-10">
+				<div class="row">
+				
+					<img src="@item.ImageUrl" class="col-lg-2" style="float:left; height:100%" />
+					<div class="row col-lg-10">
+						<div class="col-lg-12">
+							<a style="font-size:120%;" href="@item.DetailPageURL"><b>@item.Title</b></a>					
+						</div>
+						<div  class="col-lg-12">
+							<div>Lowest new price: 
+                                @if (@item.LowestNewPrice != null) 
+                                {
+                                    <span style="color:red; font-weight:bold;font-size:110%">&nbsp;@item.LowestNewPrice</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>   
+                                }
+                            </div>
+                            <div>Lowest used price: 
+                                @if (@item.LowestUsedPrice != null) 
+                                {
+                                    <span style="color:red; font-weight:bold;font-size:110%">@item.LowestUsedPrice</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>   
+                                }
+                            </div>
+
+							<button class="btn btn-default" @(item.Reviews == null ? "disabled" : "") data-toggle="collapse" data-target="#@j-review" style="float:right">Show/Hide Editorial Review</button>
+						</div>
+						
+					</div>
+				</div>
+
+                <div id="@j-review" class="collapse" style="margin-top:15px;">
+					@Html.Raw(item.Reviews)
+				</div>
+			</li>	
+			j++;
+		}
+		</ul>
+			</div>
+		
+		<div class="row">
+			<form name="pageForm" class="form-inline col-lg-offset-5" action="/Home/Search" method="get" style="padding-top:20px;padding-bottom:30px">
+				<input type="hidden" name="keywords" value="@ViewBag.keywords" />
+				<input type="hidden" name="page" value="@ViewBag.page" />
+
+				<div class="btn-toolbar">
+					@for(int i = 1; i < ((ViewBag.totalItems / 13.0 - 0.01) + 1) && i <= 4; i++)
+					{	
+						if(i != Convert.ToInt32(ViewBag.page))
+						{
+							<button type="button" class="btn btn-default" onClick="document.pageForm.page.value=@i;document.pageForm.submit()">@i</button>
+						}
+						else
+						{
+							<button disabled type="button" class="btn btn-default" onClick="document.pageForm.page.value=@i;document.pageForm.submit()">@i</button>
+						}
+					}
+				</div>
+			</form>
+		</div>
+	}
+}
